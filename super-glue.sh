@@ -12,7 +12,7 @@
 # https://github.com/Macjutsu/super
 # by Kevin M. White
 # 
-# This is modified version that installs the full copy of Super and adds support for LAPS based admin authentication
+# This is a modified version that installs the full copy of Super and adds support for LAPS based admin authentication
 # It strips out a lot of the original code but retains enough to do the same parameter processing and adds support for 
 # for reading extension attributes containing the local admin credentials. These are then passed directly to the real
 # Super script
@@ -1474,7 +1474,7 @@ checkRoot
 setDefaults
 superStartup "$@"
 getOptions "$@"
-#superInstallation
+superInstallation
 }
 
 mainWorkflow "$@"

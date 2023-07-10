@@ -1,13 +1,31 @@
-﻿#!/bin/sh
+#!/bin/sh
 # The next line disables specific ShellCheck codes for the entire script.
 # https://github.com/koalaman/shellcheck
 # shellcheck disable=SC2001,SC2009,SC2207,SC2024
 
+# Super-Glue by John Lockwood
+# https://github.com/jelockwood/Super-Glue
+#
+# This script is based on -
 # S.U.P.E.R.M.A.N.
 # Software Update/Upgrade Policy Enforcement (with) Recursive Messaging And Notification
 # https://github.com/Macjutsu/super
 # by Kevin M. White
-# modified version that installs full copy of Super and adds support for LAPS based admin authentication
+# 
+# This is modified version that installs the full copy of Super and adds support for LAPS based admin authentication
+# It strips out a lot of the original code but retains enough to do the same parameter processing and adds support for 
+# for reading extension attributes containing the local admin credentials. These are then passed directly to the real
+# Super script
+#
+# This script as provided is intended for use with the LAPS solution written by Perry Driscol
+# https://github.com/PezzaD84/macOSLAPS
+#
+# It should however be easily adaptable either to using an identical but encrypted local admin password or
+# an alternative LAPS solution
+# 
+# Due to needing to use some command paramters for its own functionality this reduces the number of command parameters
+# that can be passed to the actual Super script. I have worked to keep this overhead a low as possible and I believe only
+# two extra parameters are required for this script
 
 #superVERSION="3.0"
 #superDATE="2023/06/01"
@@ -18,15 +36,15 @@
 # Show usage documentation. 
 showUsage() {
 echo "
-  S.U.P.E.R.M.A.N.
-  Software Update Policy Enforcement (with) Recursive Messaging And Notification
+  super-glue
+  Script for adding LAPS capability to Super
   
   Version $superVERSION
   $superDATE
-  https://github.com/Macjutsu/super
+  https://github.com/jelockwood/Super-Glue
   
   Usage:
-  sudo ./super
+  sudo ./super-glue
   
   Deferment Timer Options:
   [--default-defer=seconds] [--focus-defer=seconds]
@@ -64,6 +82,7 @@ echo "
   [--admin-crypt-key=lapscryptkey-name or --admin-crypt-key=Key]
   [--super-account=AccountName] [--super-password=Password]
   [--jamf-account=AccountName] [--jamf-password=Password]
+  [--lapsapicredentials=encryptedcredentials]
   [--delete-accounts] [--user-auth-timeout=seconds]
   [--user-auth-mdm-failover=ALWAYS,NOSERVICE,SOFT,HARD,INSTALLNOW,BOOTSTRAP]
   
@@ -556,6 +575,9 @@ while [[ -n $1 ]]; do
 			jamfPASSWORD=$(echo "$1" | sed -e 's|^[^=]*=||g')
             commandPARAMS="$commandPARAMS --jamf-password=$jamfPASSWORD"
 		;;
+		--lapsapicredentials* )
+			lapsCREDENTIALS=$(echo "$1" | sed -e 's|^[^=]*=||g' | base64 -D)
+		;;
 		-d|-D|--delete-accounts )
 			deleteACCOUNTS="TRUE"
             commandPARAMS="$commandPARAMS --delete-accounts"
@@ -701,7 +723,8 @@ done
 if [[ -n "$adminPASSWORD" ]]; then
 	extensionNAME=""
 	getJamfProComputerID
-    commandRESULT=$(curl -X POST -u "$jamfOPTION:$jamfPASSWORD" -s "${jamfSERVER}api/v1/auth/token")
+#   commandRESULT=$(curl -X POST -u "$jamfOPTION:$jamfPASSWORD" -s "${jamfSERVER}api/v1/auth/token")
+    commandRESULT=$(curl -X POST -u "$lapsCREDENTIALS" -s "${jamfSERVER}api/v1/auth/token")
 	[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: commandRESULT is:\n$commandRESULT"
 	if [[ $(echo "$commandRESULT" | grep -c 'token') -gt 0 ]]; then
 		if [[ $macOSMAJOR -ge 12 ]]; then
@@ -714,13 +737,13 @@ if [[ -n "$adminPASSWORD" ]]; then
 	fi
 	echo "ID = $jamfProID"
 	echo "Token = $jamfProTOKEN"
- 	# Check adminPASSWORD and adminCryptKEY, if value of adminPASSWORD starts with 'lapscryptkey-' then the content points to an extension attribute being used as part of a LAPS implementation and we need to retrieve it and store it in adminPASSWORD, if adminCryptKEY is set to a value then it needs to be used to decrypt the adminPASSWORD.
+ 	# Check adminPASSWORD and adminCryptKEY, if value of adminPASSWORD starts with 'lapssecret-' then the content points to an extension attribute being used as part of a LAPS implementation and we need to retrieve it and store it in adminPASSWORD, if adminCryptKEY is set to a value then it needs to be used to decrypt the adminPASSWORD.
 	#
 	# first checking if adminPASSWORD is pointing to an extension attribute and if true reading its value and storing it in adminPASSWORD
-	if [[ "$adminPASSWORD" == "lapscryptkey-"* ]]; then
+	if [[ "$adminPASSWORD" == "lapssecret-"* ]]; then
 		# adminPASSWD is pointing to an extension attribute
-		# remove "lapscryptkey-" prefix to get extension attribute name
-		extensionNAME=${adminPASSWORD#"lapscryptkey-"}
+		# remove "lapssecret-" prefix to get extension attribute name
+		extensionNAME=${adminPASSWORD#"lapssecret-"}
 		echo "Ext Name = $extensionNAME"
 
 		# replace content of adminPASSWORD with content of extension attribute
@@ -738,10 +761,10 @@ if [[ -n "$adminPASSWORD" ]]; then
 	# note: this works even if an extension attribute is not used allowing an encrypted adminPASSWORD and decryption key to be passed directly as script parameters
 	if [[ -n "$adminCryptKEY" ]]; then
 		# adminCryptKEY contains value checking to see if it is pointing to an extension attribute
-		if [[ "$adminCryptKEY" == "lapssecret-"* ]]; then
+		if [[ "$adminCryptKEY" == "lapscryptkey-"* ]]; then
 			# adminCryptKEY is pointing to an extension attribute
-			# remove "lapssecret-" prefix to get extension attribute name
-			extensionNAME=${adminCryptKEY#"lapssecret-"}
+			# remove "lapscryptkey-" prefix to get extension attribute name
+			extensionNAME=${adminCryptKEY#"lapscryptkey-"}
 
 			# replace content of adminCryptKEY with content of extension attribute
 			extensionVALUE=$(curl -s -H "Accept: application/xml" $jamfSERVER/JSSResource/computers/id/$jamfProID/subset/extension_attributes -H "Authorization:Bearer $jamfProTOKEN" | xpath -e "//extension_attribute[name='$extensionNAME']" 2>&1 | awk -F'<value>|</value>' '{print $2}' | tail -n +1)
@@ -863,9 +886,7 @@ chmod +x /tmp/super
 array=($commandPARAMS)
 #echo "array ${array[@]}"
 mycmd=(/tmp/super "${array[@]}")
-echo "Before calling super"
 "${mycmd[@]}"
-echo "After calling super"
 }
 
 # Prepare super by cleaning after previous super runs, record various maintenance modes, validate parameters, and liberate super from Jamf Policy runs.
@@ -875,7 +896,7 @@ sendToStatus "Running: Startup workflow."
 sendToPending "Currently running."
 
 # Collect any locally cached or managed preferences.
-getPreferences
+#getPreferences
 
 
 
@@ -1423,7 +1444,7 @@ profilesRESULT=$(profiles status -type bootstraptoken 2>&1)
 [[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: profilesRESULT:\n$profilesRESULT"
 if [[ $(echo "$profilesRESULT" | grep -c 'YES') -eq 2 ]]; then
 	if [[ "$macOSVERSION" -ge 1303 ]]; then
-		if [[ "$mdmSERVICE" != "FALSE" ]]; then
+		if [[ "$checkBootstrapTokenSERVICE" != "FALSE" ]]; then
 			queryDeviceINFO=$(/usr/libexec/mdmclient QueryDeviceInformation 2> /dev/null | grep 'EACSPreflight' | sed -e 's/        EACSPreflight = //g' -e 's/"//g' -e 's/;//g')
 			if [[ $(echo "$queryDeviceINFO" | grep -c 'success') -gt 0 ]] || [[ $(echo "$queryDeviceINFO" | grep -c 'EFI password exists') -gt 0 ]]; then
 				sendToLog "Status: Bootstrap token escrowed and validated with MDM service."
@@ -1450,11 +1471,11 @@ fi
 mainWorkflow() {
 # Initial super workflow preparations.
 checkRoot
-setDefaults
+#setDefaults
 superStartup "$@"
 getOptions "$@"
-superInstallation
+#superInstallation
 }
 
 mainWorkflow "$@"
-cleanExit
+#cleanExit

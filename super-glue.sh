@@ -198,7 +198,7 @@ superFOLDER="/Library/Management/super"
 superLINK="/usr/local/bin/super"
 
 # Path to a PID file:
-superPIDFILE="/var/run/super.pid"
+# superPIDFILE="/var/run/super.pid"
 
 # Path to a local property list file:
 superPLIST="$superFOLDER/com.macjutsu.super" # No trailing ".plist"
@@ -723,6 +723,9 @@ done
 if [[ -n "$adminPASSWORD" ]]; then
 	extensionNAME=""
 	getJamfProComputerID
+    if [ -z "$jamfProID" ]; then
+    	jamfProID=$(/usr/bin/defaults read "/Library/Managed Preferences/com.macjutsu.super.plist" JamfProID)
+    fi
 #   commandRESULT=$(curl -X POST -u "$jamfOPTION:$jamfPASSWORD" -s "${jamfSERVER}api/v1/auth/token")
     commandRESULT=$(curl -X POST -u "$lapsCREDENTIALS" -s "${jamfSERVER}api/v1/auth/token")
 	[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: commandRESULT is:\n$commandRESULT"
@@ -735,8 +738,6 @@ if [[ -n "$adminPASSWORD" ]]; then
 	else
 		sendToLog "Error: Response from Jamf Pro API token request did not contain a token."; jamfERROR="TRUE"
 	fi
-	echo "ID = $jamfProID"
-	echo "Token = $jamfProTOKEN"
  	# Check adminPASSWORD and adminCryptKEY, if value of adminPASSWORD starts with 'lapssecret-' then the content points to an extension attribute being used as part of a LAPS implementation and we need to retrieve it and store it in adminPASSWORD, if adminCryptKEY is set to a value then it needs to be used to decrypt the adminPASSWORD.
 	#
 	# first checking if adminPASSWORD is pointing to an extension attribute and if true reading its value and storing it in adminPASSWORD
@@ -744,11 +745,9 @@ if [[ -n "$adminPASSWORD" ]]; then
 		# adminPASSWD is pointing to an extension attribute
 		# remove "lapssecret-" prefix to get extension attribute name
 		extensionNAME=${adminPASSWORD#"lapssecret-"}
-		echo "Ext Name = $extensionNAME"
 
 		# replace content of adminPASSWORD with content of extension attribute
-		extensionVALUE=$(curl -s -H "Accept: application/xml" $jamfSERVER/JSSResource/computers/id/$jamfProID/subset/extension_attributes -H "Authorization:Bearer $jamfProTOKEN" | xpath -e "//extension_attribute[name='$extensionNAME']" 2>&1 | awk -F'<value>|</value>' '{print $2}' | tail -n +1)
-     	echo "ext Val = $extensionVALUE"
+		extensionVALUE=$(curl -s -H "Accept: application/xml" $jamfSERVER/JSSResource/computers/id/$jamfProID/subset/extension_attributes -H "Authorization:Bearer $jamfProTOKEN" | xpath -e "//extension_attribute[name=normalize-space('$extensionNAME')]" 2>&1 | awk -F'<value>|</value>' '{print $2}' | tail -n +1)
      	if [[ -n "$extensionVALUE" ]]; then
 			adminPASSWORD="$extensionVALUE"
 		else
@@ -767,8 +766,9 @@ if [[ -n "$adminPASSWORD" ]]; then
 			extensionNAME=${adminCryptKEY#"lapscryptkey-"}
 
 			# replace content of adminCryptKEY with content of extension attribute
-			extensionVALUE=$(curl -s -H "Accept: application/xml" $jamfSERVER/JSSResource/computers/id/$jamfProID/subset/extension_attributes -H "Authorization:Bearer $jamfProTOKEN" | xpath -e "//extension_attribute[name='$extensionNAME']" 2>&1 | awk -F'<value>|</value>' '{print $2}' | tail -n +1)
-			if [[ -n "$extensionVALUE" ]]; then
+			extensionVALUE=$(curl -s -H "Accept: application/xml" $jamfSERVER/JSSResource/computers/id/$jamfProID/subset/extension_attributes -H "Authorization:Bearer $jamfProTOKEN" | xpath -e "//extension_attribute[name=normalize-space('$extensionNAME')]" 2>&1 | awk -F'<value>|</value>' '{print $2}' | tail -n +1)
+			echo "Crypt2 = $extensionVALUE"
+            if [[ -n "$extensionVALUE" ]]; then
 				adminCryptKEY="$extensionVALUE"
 			else
 				sendToLog "Credential Error: LAPS extension attribute $extensionNAME did not return a value."; credentialERROR="TRUE"
@@ -776,7 +776,7 @@ if [[ -n "$adminPASSWORD" ]]; then
 		fi
 		# decrypt content of adminPASSWORD
 		# note: this is using the same encryption method as https://github.com/PezzaD84/macOSLAPS
-    	adminPASSWORD=$(echo "$adminPASSWORD" | openssl enc -aes-256-cbc -md sha512 -a -d -salt -pass pass:"$adminCryptKEY")
+    	adminPASSWORD=$(echo "$adminCryptKEY" | openssl enc -aes-256-cbc -md sha512 -a -d -salt -pass pass:"$adminPASSWORD")
 	fi
 
 	# now add adminPASSWORD (decrypted if needed) to commandPARAMS
@@ -1471,7 +1471,7 @@ fi
 mainWorkflow() {
 # Initial super workflow preparations.
 checkRoot
-#setDefaults
+setDefaults
 superStartup "$@"
 getOptions "$@"
 #superInstallation

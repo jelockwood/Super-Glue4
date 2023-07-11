@@ -11,7 +11,7 @@ This script can either pass a fixed identical password to the Super script, or r
 
 This script therefore acts as the 'glue' to join Jamf Pro, Super and a macOSLAPS solution together.
 
-I am myself intending to use this with the following LAPS solution [macOSLAPS](https://github.com/PezzaD84/macOSLAPS)
+I am myself using this with the following LAPS solution [macOSLAPS](https://github.com/PezzaD84/macOSLAPS)
 
 The main component is a script which Jamf Pro calls, this Super-Glue script receives the command paramters that would otherwise be sent to the real Super script. It then as needed substitutes and/or retrieves the local admin password in to the command paramters and passes them to the real Super script. A second script is also provided which will if needed pre-populate the two extension attributes with initial values. This is because in the case of macOSLAPS it assumes it would create the local admin account but in my case and I suspect many others, the local admin account has already been created - possibly via Jamf Pro, or Jamf Connect. This second script will therefore set initial standard values to the extension attributes which macOSLAPS will then be able to use to set new random values to.
 

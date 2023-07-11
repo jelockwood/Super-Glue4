@@ -12,7 +12,7 @@
 # https://github.com/Macjutsu/super
 # by Kevin M. White
 # 
-# This is a modified version that installs the full copy of Super and adds support for LAPS based admin authentication
+# This is modified version that installs the full copy of Super and adds support for LAPS based admin authentication
 # It strips out a lot of the original code but retains enough to do the same parameter processing and adds support for 
 # for reading extension attributes containing the local admin credentials. These are then passed directly to the real
 # Super script
@@ -880,13 +880,17 @@ fi
 superInstallation() {
 # Download real Super script and then run it with command parameters original passed to this script
 echo "installation"
-curl --silent -o /tmp/super -L -O https://github.com/Macjutsu/super/raw/main/super
-chmod +x /tmp/super
+if [[ -f "/Library/LaunchDaemons/com.macjutsu.super.plist" ]]; then
+	/bin/launchctl unload -w "/Library/LaunchDaemons/com.macjutsu.super.plist"
+fi
+/usr/bin/curl --silent -o /tmp/super -L -O https://github.com/Macjutsu/super/raw/main/super
+/bin/chmod +x /tmp/super
 #echo "params = $commandPARAMS"
 array=($commandPARAMS)
 #echo "array ${array[@]}"
 mycmd=(/tmp/super "${array[@]}")
 "${mycmd[@]}"
+/bin/launchctl load -w "/Library/LaunchDaemons/com.macjutsu.super.plist"
 }
 
 # Prepare super by cleaning after previous super runs, record various maintenance modes, validate parameters, and liberate super from Jamf Policy runs.

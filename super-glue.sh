@@ -880,6 +880,21 @@ fi
 superInstallation() {
 # Download real Super script and then run it with command parameters original passed to this script
 echo "installation"
+
+# Work around for apparent bug, the way this script runs the real SUPER install script seems to result 
+# in the directory permissions being set incorrectly as drwx------ when they should be drwxr-xr-x
+# This in turn results in the real SUPER install script failing to install IBM Notifier.app
+# This workaround therefore pre-creates these directories and sets the correct permissions
+if [ ! -d "/Library/Management" ]; then
+	/bin/mkdir "/Library/Management"
+fi
+/bin/chmod 755 "/Library/Management"
+if [ ! -d "/Library/Management/super" ]; then
+	/bin/mkdir "/Library/Management/super"
+fi
+/bin/chmod 755 "/Library/Management/super"
+
+
 if [[ -f "/Library/LaunchDaemons/com.macjutsu.super.plist" ]]; then
 	/bin/launchctl unload -w "/Library/LaunchDaemons/com.macjutsu.super.plist"
 fi
@@ -1474,6 +1489,7 @@ fi
 
 mainWorkflow() {
 # Initial super workflow preparations.
+/bin/sleep 10
 checkRoot
 setDefaults
 superStartup "$@"

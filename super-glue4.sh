@@ -4,7 +4,7 @@
 # shellcheck disable=SC2001,SC2009,SC2207,SC2024
 
 # Super-Glue by John Lockwood
-# https://github.com/jelockwood/Super-Glue
+# https://github.com/jelockwood/Super-Glue4
 #
 # This script is based on -
 # S.U.P.E.R.M.A.N.

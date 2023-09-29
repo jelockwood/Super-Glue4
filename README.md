@@ -1,5 +1,7 @@
-# Super-Glue
+# Super-Glue4
 Script to 'glue' Jamf Pro, [Super](https://github.com/Macjutsu/super) and optionally a macOS LAPS solution together
+
+Note: This is a new version of my Super-Glue script specifically for use the new version 4 of Kevin M. White's SUPER script. Using my version 3 script with his version 4 script or vice versa will result in errors.
 
 [Super](https://github.com/Macjutsu/super) is a script that helps automate informing users of the availability of macOS updates _and_ upgrades. It can further help automate providing Admin level credentials to automate such installations. This is sadly something Apple are making harder and harder for Mac admins managing a fleet of Macs. Apple's (incorrect) assumption is that all users own their computers, all users are themselves admins and all users not only know what to do _and can be relied on to do it_.
 

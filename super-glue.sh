@@ -27,8 +27,8 @@
 # that can be passed to the actual Super script. I have worked to keep this overhead a low as possible and I believe only
 # two extra parameters are required for this script
 
-#superVERSION="3.0"
-#superDATE="2023/06/01"
+#superVERSION="4.0"
+#superDATE="2023/10/01"
 
 # MARK: *** Documentation ***
 ################################################################################

@@ -41,65 +41,65 @@ echo "
   
   Version $superVERSION
   $superDATE
-  https://github.com/jelockwood/Super-Glue
+  https://github.com/jelockwood/Super-Glue4
   
   Usage:
-  sudo ./super-glue
+  sudo ./super-glue4
   
   Deferment Timer Options:
-  [--default-defer=seconds] [--focus-defer=seconds]
-  [--menu-defer=seconds,seconds,etc...] [--error-defer=seconds]
-  [--recheck-defer=seconds] [--delete-deferrals]
+  [--deferral-timer-default=minutes] [--default-timer-focus=minutes]
+  [--deferral-timer-menu=minutes,minutes,etc...] [--deferral-timer-error=minutes]
+  [--deferral-timer-workflow-relaunch=minutes] [--deferral-timer-reset-all]
   
   Deferment Count Deadline Options:
-  [--focus-count=number] [--soft-count=number] [--hard-count=number]
-  [--restart-counts] [--delete-counts]
+  [--deadline-count-focus=number] [--deadline-count-soft=number] [--deadline-count-hard=number]
+  [--deadline-count-restart-all] [--deadline-count-delete-all]
   
   Deferment Days Deadline Options:
-  [--focus-days=number] [--soft-days=number] [--hard-days=number]
-  [--zero-day=YYYY-MM-DD:hh:mm] [--restart-days] [--delete-days]
+  [--deadline-days-focus=number] [--deadline-days-soft=number] [--deadline-days-hard=number]
+  [--workflow-zero-date-manual=YYYY-MM-DD:hh:mm] [--deadline-days-restart-all] [--deadline-days-delete-all]
   
   Deferment Date Deadline Options:
-  [--focus-date=YYYY-MM-DD:hh:mm] [--soft-date=YYYY-MM-DD:hh:mm]
-  [--hard-date=YYYY-MM-DD:hh:mm] [--delete-dates]
+  [--deadline-date-focus=YYYY-MM-DD:hh:mm] [--deadline-date-soft=YYYY-MM-DD:hh:mm]
+  [--deadline-date-hard=YYYY-MM-DD:hh:mm] [--deadline-date-delete-all]
   
   User Interface Options:
-  [--defer-dialog-timeout=seconds] [--soft-dialog-timeout=seconds]
-  [--display-redraw=seconds] [--display-icon=/local/path or URL]
-  [--icon-size-ibm=pixels] [--icon-size-jamf=pixels ]
+  [--dialog-timeout-restart-or-defer=seconds] [--dialog-timeout-soft-deadline=seconds]
+  [--display-icon-file=/local/path or URL]
+  [--display-icon-size=pixels]
   [--display-accessory-type=TEXTBOX|HTMLBOX|HTML|IMAGE|VIDEO|VIDEOAUTO]
-  [--display-accessory-default=/local/path or URL]
-  [--display-accessory-update=/local/path or URL]
-  [--display-accessory-upgrade=/local/path or URL]
-  [--display-accessory-user-auth=/local/path or URL]
-  [--help-button=plain text or URL] [--warning-button=plain text or URL]
+  [--display-accessory-default-file=/local/path or URL]
+  [--display-accessory-update-file=/local/path or URL]
+  [--display-accessory-upgrade-file=/local/path or URL]
+  [--display-accessory-user-auth-file=/local/path or URL]
+  [--display-help-button-string=plain text or URL] [--display-warning-button-string=plain text or URL]
   [--display-silently] [--display-silently-off]
-  [--prefer-jamf-helper] [--prefer-jamf-helper-off]
   
   Apple Silicon Credential Options:
-  [--local-account=AccountName] [--local-password=Password]
-  [--admin-account=AccountName] [--admin-password=lapssecret-name or --admin-password=Password]
+  [--auth-local-account=AccountName] [--auth-local-password=Password]
+  [--auth-service-add-via-admin-account=AccountName] 
+  [--auth-service-via-admin-password=lapssecret-name or --auth-service-via-admin-password=Password]
   [--admin-crypt-key=lapscryptkey-name or --admin-crypt-key=Key]
-  [--super-account=AccountName] [--super-password=Password]
-  [--jamf-account=AccountName] [--jamf-password=Password]
+  [--auth-service-account=AccountName] [--auth-service-password=Password]
+  [--auth-jamf-account=AccountName] [--auth-jamf-password=Password]
   [--lapsapicredentials=encryptedcredentials]
-  [--delete-accounts] [--user-auth-timeout=seconds]
-  [--user-auth-mdm-failover=ALWAYS,NOSERVICE,SOFT,HARD,INSTALLNOW,BOOTSTRAP]
+  [--auth-delete-all] [--dialog-timeout-user-auth=seconds]
+  [--auth-mdm-failover-to-user=ALWAYS,NOSERVICE,SOFT,HARD,INSTALLNOW,BOOTSTRAP]
   
   Update, Upgrade, and Restart Options:
-  [--allow-upgrade] [--allow-upgrade-off] [--target-upgrade=version]
-  [--allow-rsr-updates] [--allow-rsr-updates-off]
-  [--enforce-non-system-updates] [--enforce-non-system-updates-off]
-  [--only-download] [--only-download-off]
-  [--install-now] [--install-now-off]
-  [--policy-triggers=PolicyTrigger,PolicyTrigger,etc...]
-  [--skip-updates] [--skip-updates-off]
-  [--restart-without-updates] [--restart-without-updates-off]
+  [--install-macos-major-upgrades] [--install-macos-major-upgrades-off] [--install-macos-major-version-target=number]
+  [--install-rapid-security-responses] [--install-rapid-security-responses-off]
+  [--install-non-system-updates-wthout-restarting] [--install-non-system-updates-without-restarting-off]
+  [--workflow-only-download] [--workflow-only-download-off]
+  [--workflow-install-now]
+  [--workflow-jamf-policy-triggers=PolicyTrigger,PolicyTrigger,etc...]
+  [--workflow-disable-update-check] [--worflow-disable-update-check-off]
+  [--workflow-restart-without-updates] [--workflow-restart-without-updates-off]
   
   macOS Update/Upgrade Validation Options:
-  [--free-space-update=gigabytes] [--free-space-upgrade=gigabytes]
-  [--free-space-timeout=seconds] [--battery-level=percentage]
-  [--battery-timeout=seconds]
+  [--test-storage-update=gigabytes] [--test-storage-upgrade=gigabytes]
+  [--dialog-timeout-insufficient-storage=seconds] [--test-battery-level=percentage]
+  [--dialog-timeout-power-required=seconds]
   
   Testing, Validation, and Documentation:
   [--test-mode] [--test-mode-off] [--test-mode-timeout=seconds]
@@ -107,54 +107,50 @@ echo "
   [--usage] [--help]
   
   * Managed preferences override local options via domain: com.macjutsu.super
-  <key>DefaultDefer</key> <string>seconds</string>
-  <key>FocusDefer</key> <string>seconds</string>
-  <key>MenuDefer</key> <string>seconds,seconds,etc...</string>
-  <key>RecheckDefer</key> <string>seconds</string>
-  <key>ErrorDefer</key> <string>seconds</string>
-  <key>FocusCount</key> <string>number</string>
-  <key>SoftCount</key> <string>number</string>
-  <key>HardCount</key> <string>number</string>
-  <key>FocusDays</key> <string>number</string>
-  <key>SoftDays</key> <string>number</string>
-  <key>HardDays</key> <string>number</string>
-  <key>ZeroDay</key> <string>YYYY-MM-DD:hh:mm</string>
-  <key>FocusDate</key> <string>YYYY-MM-DD:hh:mm</string>
-  <key>SoftDate</key> <string>YYYY-MM-DD:hh:mm</string>
-  <key>HardDate</key> <string>YYYY-MM-DD:hh:mm</string>
-  <key>DeferDialogTimeout</key> <string>seconds</string>
-  <key>SoftDialogTimeout</key> <string>seconds</string>
-  <key>DisplayRedraw</key> <string>seconds</string>
-  <key>DisplayIcon</key> <string>path</string>
-  <key>IconSizeIbm</key> <string>pixels</string>
-  <key>IconSizeJamf</key> <string>pixels</string>
+  <key>DeferralTimerDefault</key> <string>minutes</string>
+  <key>DeferralTimerFocus</key> <string>minutes</string>
+  <key>DeferralTimerMenu</key> <string>minutes,minutes,etc...</string>
+  <key>DeferraTimerWorkflowRelaunch</key> <string>minutes</string>
+  <key>DeferralTimerError</key> <string>minutes</string>
+  <key>DeferralCountFocus</key> <string>number</string>
+  <key>DeferralCountSoft</key> <string>number</string>
+  <key>DeferralCounthard</key> <string>number</string>
+  <key>DeadlineDaysFocus</key> <string>number</string>
+  <key>DeadlineDaysSoft</key> <string>number</string>
+  <key>DeadlineDaysHard</key> <string>number</string>
+  <key>WorkflowZeroDateManual</key> <string>YYYY-MM-DD:hh:mm</string>
+  <key>DeadlineDateFocus</key> <string>YYYY-MM-DD:hh:mm</string>
+  <key>DeadlineDateSoft</key> <string>YYYY-MM-DD:hh:mm</string>
+  <key>DeadlineDateHard</key> <string>YYYY-MM-DD:hh:mm</string>
+  <key>DialogTimeoutRestartOrDefer</key> <string>seconds</string>
+  <key>DialogTimeoutSoftDeadline</key> <string>seconds</string>
+  <key>DisplayIconFile</key> <string>path</string>
+  <key>DisplayIconSize</key> <string>pixels</string>
   <key>DisplayAccessoryType</key>
   <string>TEXTBOX|HTMLBOX|HTML|IMAGE|VIDEO|VIDEOAUTO</string>
-  <key>DisplayAccessoryDefault</key> <string>path or URL</string>
-  <key>DisplayAccessoryUpdate</key> <string>path or URL</string>
-  <key>DisplayAccessoryUpgrade</key> <string>path or URL</string>
-  <key>DisplayAccessoryUserAuth</key> <string>path or URL</string>
-  <key>HelpButton</key> <string>plain text or URL</string>
-  <key>WarningButton</key> <string>plain text or URL</string>
-  <key>DisplaySilently</key> <true/> | <false/>
-  <key>PreferJamfHelper</key> <true/> | <false/>
-  <key>UserAuthTimeout</key> <string>seconds</string>
-  <key>UserAuthMDMFailover</key>
+  <key>DisplayAccessoryDefaultFile</key> <string>path or URL</string>
+  <key>DisplayAccessoryUpdateFile</key> <string>path or URL</string>
+  <key>DisplayAccessoryUpgradeFile</key> <string>path or URL</string>
+  <key>DisplayAccessoryUserAuthFile</key> <string>path or URL</string>
+  <key>DisplayHelpButtonString</key> <string>plain text or URL</string>
+  <key>DisplayWarningButtonString</key> <string>plain text or URL</string>
+  <key>DisplaySilently</key> <string>ALWAYS,SOFT,HARD,INSTALLNOW,DEFER,USERAUTH,POWER,STORAGE</string>
+  <key>DialogTimeoutUserAuth</key> <string>seconds</string>
+  <key>AuthMDMFailoverToUser</key>
   <string>ALWAYS,NOSERVICE,SOFT,HARD,INSTALLNOW,BOOTSTRAP</string>
-  <key>AllowUpgrade</key> <true/> | <false/>
-  <key>TargetUpgrade</key> <string>version</string>
-  <key>AllowRSRUpdates</key> <true/> | <false/>
-  <key>EnforceNonSystemUpdates</key> <true/> | <false/>
-  <key>OnlyDownload</key> <true/> | <false/>
-  <key>InstallNow</key> <true/> | <false/>
-  <key>PolicyTriggers</key> <string>PolicyTrigger,PolicyTrigger,etc...</string>
-  <key>SkipUpdates</key> <true/> | <false/>
-  <key>RestartWithoutUpdates</key> <true/> | <false/>
-  <key>FreeSpaceUpdate</key> <string>gigabytes</string>
-  <key>FreeSpaceUpgrade</key> <string>gigabytes</string>
-  <key>FreeSpaceTimeout</key> <string>seconds</string>
-  <key>BatteryLevel</key> <string>percentage</string>
-  <key>BatteryTimeout</key> <string>seconds</string>
+  <key>InstallMacOSMajorUpgrades</key> <true/> | <false/>
+  <key>InstallMacOSMajorVersionTarget</key> <string>version</string>
+  <key>InstallRapidSecurityResponses/key> <true/> | <false/>
+  <key>InstallNonSystemUpdatesWithoutRestarting</key> <true/> | <false/>
+  <key>WorkflowOnlyDownload</key> <true/> | <false/>
+  <key>WorkflowJamfPolicyTriggers</key> <string>PolicyTrigger,PolicyTrigger,etc...</string>
+  <key>WorkflowDisableUpdateCheck</key> <true/> | <false/>
+  <key>WorkflowRestartWithoutUpdates</key> <true/> | <false/>
+  <key>TestStorageUpdate</key> <string>gigabytes</string>
+  <key>TestStorageUpgrade</key> <string>gigabytes</string>
+  <key>DialogTimeoutInsufficientStorage</key> <string>seconds</string>
+  <key>TestBatteryLevel</key> <string>percentage</string>
+  <key>DialogTimeoutPowerRequired</key> <string>seconds</string>
   <key>TestMode</key> <true/> | <false/>
   <key>TestModeTimeout</key> <string>seconds</string>
   <key>VerboseMode</key> <true/> | <false/>
@@ -389,141 +385,133 @@ fi
 commandPARAMS=""
 while [[ -n $1 ]]; do
 	case "$1" in
-		--default-defer* )
+		--deferral-timer-default* )
 			defaultDeferOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --default-defer=$defaultDeferOPTION"
+            commandPARAMS="$commandPARAMS --deferral-timer-default=$defaultDeferOPTION"
 		;;
-		--focus-defer* )
+		--deferral-timer-focus* )
 			focusDeferOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --focus-defer=$focusDeferOPTION"
+            commandPARAMS="$commandPARAMS --deferral-timer-focus=$focusDeferOPTION"
 		;;
-		--menu-defer* )
+		--deferral-timer-menu* )
 			menuDeferOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --menu-defer=$menuDeferOPTION"
+            commandPARAMS="$commandPARAMS --deferral-timer-menu=$menuDeferOPTION"
 		;;
-		--recheck-defer* )
+		--deferral-timer-workflow-relaunch* )
 			recheckDeferOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --recheck-defer=$recheckDeferOPTION"
+            commandPARAMS="$commandPARAMS --deferral-timer-workflow-relaunch=$recheckDeferOPTION"
 		;;
-		--error-defer* )
+		--deferral-timer-error* )
 			errorDeferOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --error-defer=$errorDeferOPTION"
+            commandPARAMS="$commandPARAMS --deferral-timer-error=$errorDeferOPTION"
 		;;
-		--delete-deferrals )
+		--deferral-timer-reset-all )
 			deleteDEFFERALS="TRUE"
-            commandPARAMS="$commandPARAMS --delete-deferrals=$deleteDEFFERALS"
+            commandPARAMS="$commandPARAMS --deferall-timer-reset-all=$deleteDEFFERALS"
 		;;
-		--focus-count* )
+		--deadline-count-focus* )
 			focusCountOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --focus-count=$focusCountOPTION"
+            commandPARAMS="$commandPARAMS --deadline-count-focus=$focusCountOPTION"
 		;;
-		--soft-count* )
+		--deadline-count-soft* )
 			softCountOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --soft-count=$softCountOPTION"
+            commandPARAMS="$commandPARAMS --deadline-count-soft=$softCountOPTION"
 		;;
-		--hard-count* )
+		--deadline-count-hard* )
 			hardCountOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --hard-count=$hardCountOPTION"
+            commandPARAMS="$commandPARAMS --deadline-count-hard=$hardCountOPTION"
 		;;
-		--restart-counts )
+		--deadline-count-restart-all )
 			restartCOUNTS="TRUE"
-            commandPARAMS="$commandPARAMS --restart-counts"
+            commandPARAMS="$commandPARAMS --deadline-count-restart-all"
 		;;
-		--delete-counts )
+		--deadline-count-delete-all )
 			deleteCOUNTS="TRUE"
-            commandPARAMS="$commandPARAMS --delete-counts"
+            commandPARAMS="$commandPARAMS --deadline-count-delete-all"
 		;;
-		--focus-days* )
+		--deadline-days-focus* )
 			focusDaysOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --focus-days=$focusDaysOPTION"
+            commandPARAMS="$commandPARAMS --deadline-days-focus=$focusDaysOPTION"
 		;;
-		--soft-days* )
+		--deadline-days-soft* )
 			softDaysOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --soft-days=$softDaysOPTION"
+            commandPARAMS="$commandPARAMS --deadline-days-soft=$softDaysOPTION"
 		;;
-		--hard-days* )
+		--deadline-days-hard* )
 			hardDaysOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --hard-days=$hardDaysOPTION"
+            commandPARAMS="$commandPARAMS --deadline-days-hard=$hardDaysOPTION"
 		;;
-		--zero-day* )
+		--workflow-zero-date-manual* )
 			zeroDayOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --zero-day=$zeroDayOPTION"
+            commandPARAMS="$commandPARAMS --workflow-zero-date-manual=$zeroDayOPTION"
 		;;
-		--restart-days )
+		--deadline-days-restart-all )
 			restartDAYS="TRUE"
-            commandPARAMS="$commandPARAMS --restart-days"
+            commandPARAMS="$commandPARAMS --deadline-days-restart-all"
 		;;
-		--delete-days )
+		--deadline-days-delete-all )
 			deleteDAYS="TRUE"
-            commandPARAMS="$commandPARAMS --delete-days"
+            commandPARAMS="$commandPARAMS --deadline-days-delete-all"
 		;;
-		--focus-date* )
+		--deadline-date-focus* )
 			focusDateOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --focus-date=$focusDateOPTION"
+            commandPARAMS="$commandPARAMS --deadline-date-focus=$focusDateOPTION"
 		;;
-		--soft-date* )
+		--deadline-date-soft* )
 			softDateOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --soft-date=$softDateOPTION"
+            commandPARAMS="$commandPARAMS --deadline-date-soft=$softDateOPTION"
 		;;
-		--hard-date* )
+		--deadline-date-hard* )
 			hardDateOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --hard-date=$hardDateOPTION"
+            commandPARAMS="$commandPARAMS --deadline-date-hard=$hardDateOPTION"
 		;;
-		--delete-dates )
+		--deadline-date-delete-all )
 			deleteDATES="TRUE"
-            commandPARAMS="$commandPARAMS --delete-dates"
+            commandPARAMS="$commandPARAMS --deadline-date-delete-all"
 		;;
-		--defer-dialog-timeout* )
+		--dialog-timeout-restart-or-defer* )
 			deferDialogTimeoutOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --defer-dialog-timeout=$deferDialogTimeoutOPTION"
+            commandPARAMS="$commandPARAMS --dialog-timeout-restart-or-defer=$deferDialogTimeoutOPTION"
 		;;
-		--soft-dialog-timeout* )
+		--dialog-timeout-soft-deadline* )
 			softDialogTimeoutOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --soft-dialog-timeout=$softDialogTimeoutOPTION"
+            commandPARAMS="$commandPARAMS --dialog-timeout-soft-deadline=$softDialogTimeoutOPTION"
 		;;
-		--display-redraw* )
-			displayRedrawOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --display-redraw=$displayRedrawOPTION"
-		;;
-		--display-icon* )
+		--display-icon-file* )
 			displayIconOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --display-icon=$dislayIconOPTION"
+            commandPARAMS="$commandPARAMS --display-icon-file=$dislayIconOPTION"
 		;;
-		--icon-size-ibm* )
+		--display-icon-size-ibm* )
 			iconSizeIbmOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
             commandPARAMS="$commandPARAMS --icon-size-ibm=$iconSizeIbmOPTION"
-		;;
-		--icon-size-jamf* )
-			iconSizeJamfOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --icon-size-jamf=$iconSizeJamfOPTION"
 		;;
 		--display-accessory-type* )
 			displayAccessoryTypeOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
             commandPARAMS="$commandPARAMS --display-accessory-type=$dislayAccessoryTypeOPTION"
 		;;
-		--display-accessory-default* )
+		--display-accessory-default-file* )
 			displayAccessoryDefaultOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --display-accessory-default=$dislayAccessoryDefaultOPTION"
+            commandPARAMS="$commandPARAMS --display-accessory-default-file=$dislayAccessoryDefaultOPTION"
 		;;
-		--display-accessory-update* )
+		--display-accessory-update-file* )
 			displayAccessoryUpdateOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --display-accessory-update=$dislayAccessoryUpdateOPTION"
+            commandPARAMS="$commandPARAMS --display-accessory-update-file=$dislayAccessoryUpdateOPTION"
 		;;
-		--display-accessory-upgrade* )
+		--display-accessory-upgrade-file* )
 			displayAccessoryUpgradeOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --display-accessory-upgrade=$dislayAccessoryUpgradeOPTION"
+            commandPARAMS="$commandPARAMS --display-accessory-upgrade-file=$dislayAccessoryUpgradeOPTION"
 		;;
 		--display-accessory-user-auth* )
 			displayAccessoryUserAuthOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
             commandPARAMS="$commandPARAMS --display-accessory-user-auth=$dislayAccessoryUserAuthOPTION"
 		;;
-		--help-button* )
+		--display-help-button-string* )
 			helpButtonOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --help-button=$helpButtonOPTION"
+            commandPARAMS="$commandPARAMS --display-help-button-string=$helpButtonOPTION"
 		;;
-		--warning-button* )
+		--display-warning-button-string* )
 			warningButtonOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --warning-button=$warningButtonOPTION"
+            commandPARAMS="$commandPARAMS --display-warning-button-string=$warningButtonOPTION"
 		;;
 		-Q|--display-silently|--display-silently-on )
 			displaySilentlyOPTION="TRUE"
@@ -533,146 +521,134 @@ while [[ -n $1 ]]; do
 			displaySilentlyOPTION="FALSE"
             commandPARAMS="$commandPARAMS --display-silently-off"
 		;;
-		-J|--prefer-jamf-helper|--prefer-jamf-helper-on )
-			preferJamfHelperOPTION="TRUE"
-            commandPARAMS="$commandPARAMS --prefer-jamf-helper"
-		;;
-		-j|--prefer-jamf-helper-off|--no-prefer-jamf-helper )
-			preferJamfHelperOPTION="FALSE"
-            commandPARAMS="$commandPARAMS --prefer-jamf-helper-off"
-		;;
-		--local-account* )
+		--auth-local-account* )
 			localOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
             commandPARAMS="$commandPARAMS --local-account=$localOPTION"
 		;;
-		--local-password* )
+		--auth-local-password* )
 			localPASSWORD=$(echo "$1" | sed -e 's|^[^=]*=||g')
             commandPARAMS="$commandPARAMS --local-password=$localPASSWORD"
 		;;
-		--admin-account* )
+		--auth-service-add-via-admin-account* )
 			adminACCOUNT=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --admin-account=$adminACCOUNT"
+            commandPARAMS="$commandPARAMS --auth-service-add-via-admin-account=$adminACCOUNT"
 		;;
-		--admin-password* )
+		--auth-service-add-via-admin-password* )
 			adminPASSWORD=$(echo "$1" | sed -e 's|^[^=]*=||g')
 		;;
 		--admin-crypt-key* )
 			adminCryptKEY=$(echo "$1" | sed -e 's|^[^=]*=||g')
 		;;
-		--super-account* )
+		--auth-super-account* )
 			superOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --super-account=$superOPTION"
+            commandPARAMS="$commandPARAMS --auth-super-account=$superOPTION"
 		;;
-		--super-password* )
+		--auth-super-password* )
 			superPASSWORD=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --super-password=$superPASSWORD"
+            commandPARAMS="$commandPARAMS --auth-super-password=$superPASSWORD"
 		;;
-		--jamf-account* )
+		--auth-jamf-account* )
 			jamfOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --jamf-account=$jamfOPTION"
+            commandPARAMS="$commandPARAMS --auth-jamf-account=$jamfOPTION"
 		;;
-		--jamf-password* )
+		--auth-jamf-password* )
 			jamfPASSWORD=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --jamf-password=$jamfPASSWORD"
+            commandPARAMS="$commandPARAMS --auth-jamf-password=$jamfPASSWORD"
 		;;
 		--lapsapicredentials* )
 			lapsCREDENTIALS=$(echo "$1" | sed -e 's|^[^=]*=||g' | base64 -D)
 		;;
-		-d|-D|--delete-accounts )
+		-d|-D|--auth-delete-all )
 			deleteACCOUNTS="TRUE"
-            commandPARAMS="$commandPARAMS --delete-accounts"
+            commandPARAMS="$commandPARAMS --auth-delete-all"
 		;;
-		-M|--allow-upgrade|--allow-upgrade-on )
+		-M|--install-macos-major-upgrades|--install-macos-major-upgrades-on )
 			allowUpgradeOPTION="TRUE"
-            commandPARAMS="$commandPARAMS --allow-upgrade"
+            commandPARAMS="$commandPARAMS --install-macos-major-upgrades"
 		;;
-		-m|--allow-upgrade-off|--no-allow-upgrade )
+		-m|--install-macos-major-upgrades-off )
 			allowUpgradeOPTION="FALSE"
-            commandPARAMS="$commandPARAMS --allow-upgrade-off"
+            commandPARAMS="$commandPARAMS --install-macos-major-upgrades-off"
 		;;
-		--user-auth-timeout* )
+		--dialog-timeout-user-auth* )
 			userAuthTimeoutOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --user-auth-timeout=$userAuthTimeoutOPTION"
+            commandPARAMS="$commandPARAMS --dialog-timeout-user-auth=$userAuthTimeoutOPTION"
 		;;
-		--user-auth-mdm-failover* )
+		--auth-mdm-failover-to-user* )
 			userAuthMDMFailoverOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --user-auth-mdm-failover=$userAuthMDMFailoverOPTION"
+            commandPARAMS="$commandPARAMS --auth-mdm-failover-to-user=$userAuthMDMFailoverOPTION"
 		;;
-		--target-upgrade* )
+		--install-macos-major-upgrades* )
 			targetUpgradeOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --target-upgrade=$targetUpgradeOPTION"
+            commandPARAMS="$commandPARAMS --install-macos-major-upgrades=$targetUpgradeOPTION"
 		;;
-		-N|--enforce-non-system-updates|--enforce-non-system-updates-on )
+		-N|--install-non-system-updates-without-restarting )
 			enforceNonSystemUpdatesOPTION="TRUE"
-            commandPARAMS="$commandPARAMS --enforce-non-system-updates"
+            commandPARAMS="$commandPARAMS --install-non-system-updates-without-restarting"
 		;;
-		-n|--enforce-non-system-updates-off|--no-enforce-non-system-updates )
+		-n|--install-non-system-updates-without-restarting-off )
 			enforceNonSystemUpdatesOPTION="FALSE"
-            commandPARAMS="$commandPARAMS --enforce-non-system-updates-off"
+            commandPARAMS="$commandPARAMS --install--non-system-updates-without-restarting-off"
 		;;
-		-R|--allow-rsr-updates|--allow-rsr-updates-on )
+		-R|--install-rapid-security-responses )
 			allowRSRUpdatesOPTION="TRUE"
-            commandPARAMS="$commandPARAMS --allow-rsr-updates"
+            commandPARAMS="$commandPARAMS --install-rapid-security-responses"
 		;;
-		-r|--allow-rsr-updates-off|--no-allow-rsr-updates )
+		-r|--install-rapid-security-responses-off )
 			allowRSRUpdatesOPTION="FALSE"
-            commandPARAMS="$commandPARAMS --allow-rsr-updates-off"
+            commandPARAMS="$commandPARAMS --install-rapid-security-responses-off"
 		;;
-		-O|--only-download|--only-download-on )
+		-O|--workflow-only-download )
 			onlyDownloadOPTION="TRUE"
-            commandPARAMS="$commandPARAMS --only-download"
+            commandPARAMS="$commandPARAMS --workflow-only-download"
 		;;
-		-o|--only-download-off|--no-only-download )
+		-o|--workflow-only-download-off )
 			onlyDownloadOPTION="FALSE"
-            commandPARAMS="$commandPARAMS --only-download-off"
+            commandPARAMS="$commandPARAMS --workflow-only-download-off"
 		;;
-		-I|--install-now|--install-now-on )
+		-I|--workflow-install-now )
 			installNowOPTION="TRUE"
-            commandPARAMS="$commandPARAMS --install-now"
+            commandPARAMS="$commandPARAMS --workflow-install-now"
 		;;
-		-i|--install-now-off|--no-update-now )
-			installNowOPTION="FALSE"
-            commandPARAMS="$commandPARAMS --install-now-off"
-		;;
-		--policy-triggers* )
+		--worklow-jamf-policy-triggers* )
 			policyTriggersOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --policy-triggers=$policyTriggersOPTION"
+            commandPARAMS="$commandPARAMS --workflow-jamf-policy-triggers=$policyTriggersOPTION"
 		;;
-		-S|--skip-updates|--skip-updates-on )
+		-S|--workflow-disable-update-check )
 			skipUpdatesOPTION="TRUE"
-            commandPARAMS="$commandPARAMS --skip-updates"
+            commandPARAMS="$commandPARAMS --workflow-disable-update-check"
 		;;
-		-s|--skip-updates-off|--no-skip-updates )
+		-s|--workflow-disable-update-check-off )
 			skipUpdatesOPTION="FALSE"
-            commandPARAMS="$commandPARAMS --skip-updates-off"
+            commandPARAMS="$commandPARAMS --workflow-disable-update-check-off"
 		;;
-		-W|--restart-without-updates|--restart-without-updates-on )
+		-W|--workflow-restart-without-updates )
 			restartWithoutUpdatesOPTION="TRUE"
-            commandPARAMS="$commandPARAMS --restart-without-updates"
+            commandPARAMS="$commandPARAMS --workflow-restart-without-updates"
 		;;
-		-w|--restart-without-updates-off|--no-restart-without-updates )
+		-w|--workflow-restart-without-updates-off )
 			restartWithoutUpdatesOPTION="FALSE"
-            commandPARAMS="$commandPARAMS --restart-without-updates-off"
+            commandPARAMS="$commandPARAMS --workflow-restart-without-updates-off"
 		;;
-		--free-space-update* )
+		--test-storage-update* )
 			freeSpaceUpdateOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --free-space-update=$freeSpaceUpdateOPTION"
+            commandPARAMS="$commandPARAMS --test-storage-update=$freeSpaceUpdateOPTION"
 		;;
-		--free-space-upgrade* )
+		--test-storage-upgrade* )
 			freeSpaceUpgradeOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --free-space-upgrade=$freeSpaceUpgradeOPTION"
+            commandPARAMS="$commandPARAMS --test-storage-upgrade=$freeSpaceUpgradeOPTION"
 		;;
-		--free-space-timeout* )
+		--dialog-timeout-insufficient-storage* )
 			freeSpaceTimeoutOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --free-space-timeout=$freeSpaceTimeoutOPTION"
+            commandPARAMS="$commandPARAMS --dialog-timeout-insufficient-storage=$freeSpaceTimeoutOPTION"
 		;;
-		--battery-level* )
+		--test-battery-level* )
 			batteryLevelOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --battery-level=$batteryLevelOPTION"
+            commandPARAMS="$commandPARAMS --test-battery-level=$batteryLevelOPTION"
 		;;
-		--battery-timeout* )
+		--dialog-timeout-power-required* )
 			batteryTimeoutOPTION=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            commandPARAMS="$commandPARAMS --battery-timeout=$batteryTimeoutOPTION"
+            commandPARAMS="$commandPARAMS --dialog-tmeout-power-required=$batteryTimeoutOPTION"
 		;;
 		-T|--test-mode|--test-mode-on )
 			testModeOPTION="TRUE"
@@ -780,7 +756,7 @@ if [[ -n "$adminPASSWORD" ]]; then
 	fi
 
 	# now add adminPASSWORD (decrypted if needed) to commandPARAMS
-    commandPARAMS="$commandPARAMS --admin-password=$adminPASSWORD"
+    commandPARAMS="$commandPARAMS --auth-service-add-via-admin-password=$adminPASSWORD"
 fi
 # we can now pass all the script command parameters including the retrieved/decrypted admin password to the real Super script
 # we do not need to pass --admin-crypt-key as the whole point of this script is to if needed decrypt the admin password on behalf of the real Super script

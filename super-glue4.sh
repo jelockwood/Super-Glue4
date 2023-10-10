@@ -535,6 +535,7 @@ while [[ -n $1 ]]; do
 		;;
 		--auth-service-add-via-admin-password* )
 			adminPASSWORD=$(echo "$1" | sed -e 's|^[^=]*=||g')
+            echo "adminPASSWORD = $adminPASSWORD"
 		;;
 		--admin-crypt-key* )
 			adminCryptKEY=$(echo "$1" | sed -e 's|^[^=]*=||g')
@@ -700,7 +701,7 @@ if [[ -n "$adminPASSWORD" ]]; then
 	extensionNAME=""
 	getJamfProComputerID
     if [ -z "$jamfProID" ]; then
-    	jamfProID=$(/usr/bin/defaults read "/Library/Managed Preferences/com.macjutsu.super.plist" JamfProID)
+    	jamfProID=$(/usr/bin/defaults read "/Library/Managed Preferences/com.macjutsu.super.plist" AuthJamfComputerID)
     fi
 #   commandRESULT=$(curl -X POST -u "$jamfOPTION:$jamfPASSWORD" -s "${jamfSERVER}api/v1/auth/token")
     commandRESULT=$(curl -X POST -u "$lapsCREDENTIALS" -s "${jamfSERVER}api/v1/auth/token")
@@ -769,7 +770,7 @@ getPreferences() {
 
 # Collect any managed preferences from $superMANAGEDPLIST.
 if [[ -f "$superMANAGEDPLIST.plist" ]]; then
-	jamfProIdMANAGED=$(defaults read "$superMANAGEDPLIST" JamfProID 2> /dev/null)
+	jamfProIdMANAGED=$(defaults read "$superMANAGEDPLIST" AuthJamfComputerID 2> /dev/null)
     # this script only needs the Jamf Pro ID, the real Super script will itself read this and all the other preferences
 fi
 
@@ -874,7 +875,8 @@ fi
 if [[ -f "/Library/LaunchDaemons/com.macjutsu.super.plist" ]]; then
 	/bin/launchctl unload -w "/Library/LaunchDaemons/com.macjutsu.super.plist"
 fi
-/usr/bin/curl --silent -o /tmp/super -L -O https://github.com/Macjutsu/super/raw/main/super
+#/usr/bin/curl --silent -o /tmp/super -L -O https://github.com/Macjutsu/super/raw/main/super
+/usr/bin/curl --silent -o /tmp/super -L -O https://github.com/Macjutsu/super/raw/4.0.0-beta3/super
 /bin/chmod +x /tmp/super
 #echo "params = $commandPARAMS"
 array=($commandPARAMS)
@@ -1082,7 +1084,7 @@ sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: errorDeferSECONDS is: $errorDe
 [[ -n $superACCOUNT ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: superACCOUNT is: $superACCOUNT"
 [[ -n $superKEYCHAIN ]] && sendToEcho "Verbose Mode: Function ${FUNCNAME[0]}: superKEYCHAIN is: $superKEYCHAIN"
 [[ -n $superCREDENTIAL ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: superCREDENTIAL is: $superCREDENTIAL"
-[[ -n $JamfProID ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: JamfProID is: $JamfProID"
+[[ -n $JamfProID ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: AuthJamfComputerID is: $JamfProID"
 [[ -n $jamfOPTION ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: jamfOPTION is: $jamfOPTION"
 [[ -n $jamfPASSWORD ]] && sendToEcho "Verbose Mode: Function ${FUNCNAME[0]}: jamfPASSWORD is: $jamfPASSWORD"
 [[ -n $jamfACCOUNT ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: jamfACCOUNT is: $jamfACCOUNT"
@@ -1179,10 +1181,10 @@ computerUDID=$(system_profiler SPHardwareDataType | awk '/UUID/ { print $3; }')
 if [[ -n $jamfProIdMANAGED ]]; then
 	jamfProID="$jamfProIdMANAGED"
 else
-	sendToLog "Warning: Using a Jamf Pro API account with \"Computers > Read\" privileges to collect the computer ID is a security risk. Instead use a custom Configuration Profile with the following; Preference Domain \"com.macjutsu.super\", Key \"JamfProID\", String \"\$JSSID\"."
+	sendToLog "Warning: Using a Jamf Pro API account with \"Computers > Read\" privileges to collect the computer ID is a security risk. Instead use a custom Configuration Profile with the following; Preference Domain \"com.macjutsu.super\", Key \"AuthJamfComputerID\", String \"\$JSSID\"."
 	jamfProID=$(curl --header "Authorization: Bearer ${jamfProTOKEN}" --header "Accept: application/xml" --request GET --url "${jamfSERVER}JSSResource/computers/udid/${computerUDID}/subset/General" 2> /dev/null | xpath -e /computer/general/id 2>&1 | awk -F '<id>|</id>' '{print $2}' | xargs)
 fi
-[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: jamfProID is: $jamfProID"
+[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: AuthJamfComputerID is: $jamfProID"
 }
 
 # Attempt to send a Blank Push to Jamf Pro.

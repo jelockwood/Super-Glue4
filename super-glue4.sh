@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # The next line disables specific ShellCheck codes for the entire script.
 # https://github.com/koalaman/shellcheck
 # shellcheck disable=SC2001,SC2009,SC2207,SC2024
@@ -78,7 +78,7 @@ echo "
   Apple Silicon Credential Options:
   [--auth-local-account=AccountName] [--auth-local-password=Password]
   [--auth-service-add-via-admin-account=AccountName] 
-  [--auth-service-via-admin-password=lapssecret-name or --auth-service-via-admin-password=Password]
+  [--auth-service-add-via-admin-password=lapssecret-name or --auth-service-add-via-admin-password=Password]
   [--admin-crypt-key=lapscryptkey-name or --admin-crypt-key=Key]
   [--auth-service-account=AccountName] [--auth-service-password=Password]
   [--auth-jamf-account=AccountName] [--auth-jamf-password=Password]
@@ -535,8 +535,7 @@ while [[ -n $1 ]]; do
 		;;
 		--auth-service-add-via-admin-password* )
 			adminPASSWORD=$(echo "$1" | sed -e 's|^[^=]*=||g')
-            echo "adminPASSWORD = $adminPASSWORD"
-		;;
+ 		;;
 		--admin-crypt-key* )
 			adminCryptKEY=$(echo "$1" | sed -e 's|^[^=]*=||g')
 		;;
@@ -718,23 +717,28 @@ if [[ -n "$adminPASSWORD" ]]; then
  	# Check adminPASSWORD and adminCryptKEY, if value of adminPASSWORD starts with 'lapssecret-' then the content points to an extension attribute being used as part of a LAPS implementation and we need to retrieve it and store it in adminPASSWORD, if adminCryptKEY is set to a value then it needs to be used to decrypt the adminPASSWORD.
 	#
 	# first checking if adminPASSWORD is pointing to an extension attribute and if true reading its value and storing it in adminPASSWORD
+	adminPASSWORD=$(sed -e 's/^"//' -e 's/"$//' <<<"$adminPASSWORD")
 	if [[ "$adminPASSWORD" == "lapssecret-"* ]]; then
-		# adminPASSWD is pointing to an extension attribute
+		# adminPASSWORD is pointing to an extension attribute
 		# remove "lapssecret-" prefix to get extension attribute name
-		extensionNAME=${adminPASSWORD#"lapssecret-"}
 
 		# replace content of adminPASSWORD with content of extension attribute
+		extensionNAME=${adminPASSWORD#"lapssecret-"}
 		extensionVALUE=$(curl -s -H "Accept: application/xml" $jamfSERVER/JSSResource/computers/id/$jamfProID/subset/extension_attributes -H "Authorization:Bearer $jamfProTOKEN" | xpath -e "//extension_attribute[name=normalize-space('$extensionNAME')]" 2>&1 | awk -F'<value>|</value>' '{print $2}' | tail -n +1)
-     	if [[ -n "$extensionVALUE" ]]; then
+     		if [[ -n "$extensionVALUE" ]]; then
 			adminPASSWORD="$extensionVALUE"
 		else
 			sendToLog "Credential Error: LAPS extension attribute $extensionNAME did not return a value."; credentialERROR="TRUE"
 		fi
+	else
+		sendToLog "ext name error = $adminPASSWORD"
 	fi
+
 
 	extensionNAME=""
 	# now checking if adminCryptKEY is set and if so then using it to decrypt the content of adminPASSWORD
 	# note: this works even if an extension attribute is not used allowing an encrypted adminPASSWORD and decryption key to be passed directly as script parameters
+	adminCryptKEY=$(sed -e 's/^"//' -e 's/"$//' <<<"$adminCryptKEY")
 	if [[ -n "$adminCryptKEY" ]]; then
 		# adminCryptKEY contains value checking to see if it is pointing to an extension attribute
 		if [[ "$adminCryptKEY" == "lapscryptkey-"* ]]; then
@@ -744,12 +748,13 @@ if [[ -n "$adminPASSWORD" ]]; then
 
 			# replace content of adminCryptKEY with content of extension attribute
 			extensionVALUE=$(curl -s -H "Accept: application/xml" $jamfSERVER/JSSResource/computers/id/$jamfProID/subset/extension_attributes -H "Authorization:Bearer $jamfProTOKEN" | xpath -e "//extension_attribute[name=normalize-space('$extensionNAME')]" 2>&1 | awk -F'<value>|</value>' '{print $2}' | tail -n +1)
-			echo "Crypt2 = $extensionVALUE"
-            if [[ -n "$extensionVALUE" ]]; then
+		        if [[ -n "$extensionVALUE" ]]; then
 				adminCryptKEY="$extensionVALUE"
 			else
 				sendToLog "Credential Error: LAPS extension attribute $extensionNAME did not return a value."; credentialERROR="TRUE"
 			fi
+		else
+			sendToLog "ext name error = $adminCryptKEY"
 		fi
 		# decrypt content of adminPASSWORD
 		# note: this is using the same encryption method as https://github.com/PezzaD84/macOSLAPS
@@ -757,7 +762,7 @@ if [[ -n "$adminPASSWORD" ]]; then
 	fi
 
 	# now add adminPASSWORD (decrypted if needed) to commandPARAMS
-    commandPARAMS="$commandPARAMS --auth-service-add-via-admin-password=$adminPASSWORD"
+    	commandPARAMS="$commandPARAMS --auth-service-add-via-admin-password=$adminPASSWORD"
 fi
 # we can now pass all the script command parameters including the retrieved/decrypted admin password to the real Super script
 # we do not need to pass --admin-crypt-key as the whole point of this script is to if needed decrypt the admin password on behalf of the real Super script

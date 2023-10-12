@@ -25,12 +25,13 @@ The main component is a script which Jamf Pro calls, this Super-Glue script rece
 
 Since Super-Glue not only reads any updated LAPS credentials to pass to the 'real' Super script but also installs or reinstalls Super it is not necessary to define any Super specific Policy in Jamf Pro. You _do_ still need to define the same Profile in Jamf Pro as this will still be read by the Super script after it is installed (or re-installed) by Super-Glue. Super-Glue does require its own policy and will also require the same script command parameters to be passed to Super-Glue which it will then pass to the 'real' Super script. Super-Glue also uses two optional parameters and adds extra capability to one existing parameter.
 
-![Screenshot 2023-10-12 at 14 53 19](https://github.com/jelockwood/Super-Glue4/assets/4300786/3fbc8391-3ebf-4969-a8eb-2e847ef10c5e)*The above shows the commandline parameters I use in my Super-Glue Jamf policy with my values redacted.*
+![Screenshot 2023-10-12 at 14 53 19](https://github.com/jelockwood/Super-Glue4/assets/4300786/3fbc8391-3ebf-4969-a8eb-2e847ef10c5e "The above shows the commandline parameters I use in my Super-Glue Jamf policy with my values redacted.")
 
-![Screenshot 2023-07-11 at 09 52 55](https://github.com/jelockwood/Super-Glue/assets/4300786/06e2b3fd-73fc-4b89-af98-06e6dbbd4cd1)*The above shows the triggers for my Super-Glue jamf policy, in my case it is triggered by my macOSLAPS policy each time the macOSLAPS policy runs - see below, if however you are not using a LAPS solution then you might instead run this once only on a checkin.*
+![252610521-06e2b3fd-73fc-4b89-af98-06e6dbbd4cd1](https://github.com/jelockwood/Super-Glue4/assets/4300786/c1b8c69e-c2e6-4c9e-9ae6-7cc8b5f93f67 "The above shows the triggers for my Super-Glue jamf policy, in my case it is triggered by my macOSLAPS policy each time the macOSLAPS policy runs - see below, if however you are not using a LAPS solution then you might instead run this once only on a checkin.")
 
 Note: If and when macOSLAPS changes the local admin password not only in the extension attributes but also of the local admin accounts itself, then it will be necessary to re-run the Super-Glue script so it can then tell the real Super script the new credentials. This can be automatically triggered by adding a 'Files and Processes' entry to the macOSLAPS Jamf policy so that it executes the command ```jamf policy -event super-glue``` which will triger re-running the super-glue script. The super-glue script will then read the updated extension attributes containing the updates LAPS credentials and pass them to the 'real' super script.
-![Screenshot 2023-07-05 at 13 57 35](https://github.com/jelockwood/Super-Glue/assets/4300786/4227d9dd-b115-493a-817a-e17913fe2578)*The above shows how my macOSLAPS policy triggers my Super-Glue policy.*
+
+![Screenshot 2023-07-05 at 13 57 35](https://github.com/jelockwood/Super-Glue/assets/4300786/4227d9dd-b115-493a-817a-e17913fe2578 "The above shows how my macOSLAPS policy triggers my Super-Glue policy.")
 
 Since we need to regularly re-run the super-glue script and hence rerun the super install process we should _not_ include as a paramter the super reset option. This allows updating the existing super setup each time macOSLAPS does a LAPS update.
 

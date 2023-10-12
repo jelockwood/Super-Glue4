@@ -1,4 +1,6 @@
 # Super-Glue4
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
+
 Script to 'glue' Jamf Pro, [Super](https://github.com/Macjutsu/super) and optionally a macOS LAPS solution together
 
 Note: This is a new version of my Super-Glue script specifically for use the new version 4 of Kevin M. White's SUPER script. Using my version 3 script with his version 4 script or vice versa will result in errors. Along with changes to the SUPER code, and changes the preference key names and hence changes to a managedprofile, there are also changes to the commandline parameters that the SUPER script is expecting. This is where in particular my Super-Glue script needed modifying to match. See the following table on the SUPER repo for a list of the version 3 and version 4 commandline parameters.

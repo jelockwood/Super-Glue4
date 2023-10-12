@@ -881,7 +881,7 @@ if [[ -f "/Library/LaunchDaemons/com.macjutsu.super.plist" ]]; then
 	/bin/launchctl unload -w "/Library/LaunchDaemons/com.macjutsu.super.plist"
 fi
 #/usr/bin/curl --silent -o /tmp/super -L -O https://github.com/Macjutsu/super/raw/main/super
-/usr/bin/curl --silent -o /tmp/super -L -O https://github.com/Macjutsu/super/raw/4.0.0-beta3/super
+/usr/bin/curl --silent -o /tmp/super -L -O https://github.com/Macjutsu/super/raw/4.0.0-beta4/super
 /bin/chmod +x /tmp/super
 #echo "params = $commandPARAMS"
 array=($commandPARAMS)

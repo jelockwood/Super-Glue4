@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # The next line disables specific ShellCheck codes for the entire script.
 # https://github.com/koalaman/shellcheck
 # shellcheck disable=SC2001,SC2009,SC2207,SC2024
@@ -27,8 +27,8 @@
 # that can be passed to the actual Super script. I have worked to keep this overhead a low as possible and I believe only
 # two extra parameters are required for this script
 
-#superVERSION="4.0"
-#superDATE="2023/10/01"
+#superVERSION="4.0.2"
+#superDATE="2023/11/01"
 
 # MARK: *** Documentation ***
 ################################################################################
@@ -78,7 +78,7 @@ echo "
   Apple Silicon Credential Options:
   [--auth-local-account=AccountName] [--auth-local-password=Password]
   [--auth-service-add-via-admin-account=AccountName] 
-  [--auth-service-add-via-admin-password=lapssecret-name or --auth-service-add-via-admin-password=Password]
+  [--auth-service-via-admin-password=lapssecret-name or --auth-service-add-via-admin-password=Password]
   [--admin-crypt-key=lapscryptkey-name or --admin-crypt-key=Key]
   [--auth-service-account=AccountName] [--auth-service-password=Password]
   [--auth-jamf-account=AccountName] [--auth-jamf-password=Password]
@@ -358,6 +358,7 @@ mdmWorkflowTimeoutSECONDS=600
 testModeTimeoutSECONDS=10
 
 # These parameters identify the relevant system information.
+macSERIAL=$(system_profiler SPHardwareDataType | awk '/Serial/{print $NF}')
 macOSMAJOR=$(sw_vers -productVersion | cut -d'.' -f1) # Expected output: 10, 11, 12
 macOSMINOR=$(sw_vers -productVersion | cut -d'.' -f2) # Expected output: 14, 15, 06, 01
 macOSVERSION=${macOSMAJOR}$(printf "%02d" "$macOSMINOR") # Expected output: 1014, 1015, 1106, 1203
@@ -535,7 +536,7 @@ while [[ -n $1 ]]; do
 		;;
 		--auth-service-add-via-admin-password* )
 			adminPASSWORD=$(echo "$1" | sed -e 's|^[^=]*=||g')
- 		;;
+		;;
 		--admin-crypt-key* )
 			adminCryptKEY=$(echo "$1" | sed -e 's|^[^=]*=||g')
 		;;
@@ -556,7 +557,8 @@ while [[ -n $1 ]]; do
             commandPARAMS="$commandPARAMS --auth-jamf-password=$jamfPASSWORD"
 		;;
 		--lapsapicredentials* )
-			lapsCREDENTIALS=$(echo "$1" | sed -e 's|^[^=]*=||g' | base64 -D)
+			lapsCREDENTIALS=$(echo "$1" | sed -e 's|^[^=]*=||g')
+#			lapsCREDENTIALS=$(echo "$1" | sed -e 's|^[^=]*=||g' | base64 -D)
 		;;
 		-d|-D|--auth-delete-all )
 			deleteACCOUNTS="TRUE"
@@ -699,41 +701,46 @@ done
 if [[ -n "$adminPASSWORD" ]]; then
 	extensionNAME=""
 	getJamfProComputerID
-    if [ -z "$jamfProID" ]; then
+	if [ -z "$jamfProID" ]; then
     	jamfProID=$(/usr/bin/defaults read "/Library/Managed Preferences/com.macjutsu.super.plist" AuthJamfComputerID)
     fi
+	echo "ID2 = $jamfProID"
+	echo "jamfOPTION = $jamfOPTION"
+	echo "jamfPASSWORD = $jamfPASSWORD"
+	echo "lapscred = $lapsCREDENTIALS"
+	echo "JSS = $jamfSERVER"
+	encodedCredentials=$( printf "$jamfOPTION:$jamfPASSWORD" | /usr/bin/iconv -t ISO-8859-1 | /usr/bin/base64 -i - )
+	echo "encoded = $encodedCredentials"
 #   commandRESULT=$(curl -X POST -u "$jamfOPTION:$jamfPASSWORD" -s "${jamfSERVER}api/v1/auth/token")
-    commandRESULT=$(curl -X POST -u "$lapsCREDENTIALS" -s "${jamfSERVER}api/v1/auth/token")
+	commandRESULT=$( /usr/bin/curl "{$jamfSERVER}uapi/auth/tokens" \
+--silent \
+--request POST \
+--header "Authorization: Basic $lapsCREDENTIALS" )
 	[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: commandRESULT is:\n$commandRESULT"
 	if [[ $(echo "$commandRESULT" | grep -c 'token') -gt 0 ]]; then
-		if [[ $macOSMAJOR -ge 12 ]]; then
-			jamfProTOKEN=$(echo "$commandRESULT" | plutil -extract token raw -)
-		else
-			jamfProTOKEN=$(echo "$commandRESULT" | grep 'token' | tr -d '"',',' | sed -e 's#token :##' | xargs)
-		fi
+		jamfProTOKEN=$( /usr/bin/awk -F \" '{ print $4 }' <<< "$commandRESULT" | /usr/bin/xargs )
+		echo "jamfProTOKEN = $jamfProTOKEN"
 	else
 		sendToLog "Error: Response from Jamf Pro API token request did not contain a token."; jamfERROR="TRUE"
 	fi
- 	# Check adminPASSWORD and adminCryptKEY, if value of adminPASSWORD starts with 'lapssecret-' then the content points to an extension attribute being used as part of a LAPS implementation and we need to retrieve it and store it in adminPASSWORD, if adminCryptKEY is set to a value then it needs to be used to decrypt the adminPASSWORD.
+	# Check adminPASSWORD and adminCryptKEY, if value of adminPASSWORD starts with 'lapssecret-' then the content points to an extension attribute being used as part of a LAPS implementation and we need to retrieve it and store it in adminPASSWORD, if adminCryptKEY is set to a value then it needs to be used to decrypt the adminPASSWORD.
 	#
 	# first checking if adminPASSWORD is pointing to an extension attribute and if true reading its value and storing it in adminPASSWORD
 	adminPASSWORD=$(sed -e 's/^"//' -e 's/"$//' <<<"$adminPASSWORD")
 	if [[ "$adminPASSWORD" == "lapssecret-"* ]]; then
-		# adminPASSWORD is pointing to an extension attribute
+		# adminPASSWD is pointing to an extension attribute
 		# remove "lapssecret-" prefix to get extension attribute name
-
-		# replace content of adminPASSWORD with content of extension attribute
 		extensionNAME=${adminPASSWORD#"lapssecret-"}
-		extensionVALUE=$(curl -s -H "Accept: application/xml" $jamfSERVER/JSSResource/computers/id/$jamfProID/subset/extension_attributes -H "Authorization:Bearer $jamfProTOKEN" | xpath -e "//extension_attribute[name=normalize-space('$extensionNAME')]" 2>&1 | awk -F'<value>|</value>' '{print $2}' | tail -n +1)
-     		if [[ -n "$extensionVALUE" ]]; then
+		# extensionNAME=$(echo $extensionNAME | sed -e "s/ /\\\ /g")
+	
+		# replace content of adminPASSWORD with content of extension attribute
+		extensionVALUE=$(curl -s -H "Accept: application/xml" {$jamfSERVER}JSSResource/computers/id/$jamfProID/subset/extension_attributes -H "Authorization:Bearer $jamfProTOKEN" | xpath -e "//extension_attribute[name=normalize-space('$extensionNAME')]" 2>&1 | awk -F'<value>|</value>' '{print $2}' | tail -n +1)
+		if [[ -n "$extensionVALUE" ]]; then
 			adminPASSWORD="$extensionVALUE"
 		else
 			sendToLog "Credential Error: LAPS extension attribute $extensionNAME did not return a value."; credentialERROR="TRUE"
 		fi
-	else
-		sendToLog "ext name error = $adminPASSWORD"
 	fi
-
 
 	extensionNAME=""
 	# now checking if adminCryptKEY is set and if so then using it to decrypt the content of adminPASSWORD
@@ -745,16 +752,15 @@ if [[ -n "$adminPASSWORD" ]]; then
 			# adminCryptKEY is pointing to an extension attribute
 			# remove "lapscryptkey-" prefix to get extension attribute name
 			extensionNAME=${adminCryptKEY#"lapscryptkey-"}
+			# extensionNAME=$(echo $extensionNAME | sed -e "s/ /\\\ /g")
 
 			# replace content of adminCryptKEY with content of extension attribute
-			extensionVALUE=$(curl -s -H "Accept: application/xml" $jamfSERVER/JSSResource/computers/id/$jamfProID/subset/extension_attributes -H "Authorization:Bearer $jamfProTOKEN" | xpath -e "//extension_attribute[name=normalize-space('$extensionNAME')]" 2>&1 | awk -F'<value>|</value>' '{print $2}' | tail -n +1)
-		        if [[ -n "$extensionVALUE" ]]; then
+			extensionVALUE=$(curl -s -H "Accept: application/xml" {$jamfSERVER}JSSResource/computers/id/$jamfProID/subset/extension_attributes -H "Authorization:Bearer $jamfProTOKEN" | xpath -e "//extension_attribute[name=normalize-space('$extensionNAME')]" 2>&1 | awk -F'<value>|</value>' '{print $2}' | tail -n +1)
+            if [[ -n "$extensionVALUE" ]]; then
 				adminCryptKEY="$extensionVALUE"
 			else
 				sendToLog "Credential Error: LAPS extension attribute $extensionNAME did not return a value."; credentialERROR="TRUE"
 			fi
-		else
-			sendToLog "ext name error = $adminCryptKEY"
 		fi
 		# decrypt content of adminPASSWORD
 		# note: this is using the same encryption method as https://github.com/PezzaD84/macOSLAPS
@@ -762,7 +768,7 @@ if [[ -n "$adminPASSWORD" ]]; then
 	fi
 
 	# now add adminPASSWORD (decrypted if needed) to commandPARAMS
-    	commandPARAMS="$commandPARAMS --auth-service-add-via-admin-password=$adminPASSWORD"
+    commandPARAMS="$commandPARAMS --auth-service-add-via-admin-password=$adminPASSWORD"
 fi
 # we can now pass all the script command parameters including the retrieved/decrypted admin password to the real Super script
 # we do not need to pass --admin-crypt-key as the whole point of this script is to if needed decrypt the admin password on behalf of the real Super script
@@ -805,6 +811,7 @@ regexMACOSMAJORVERSION="^([1][1-9])$"
 
 # For Apple Silicon computers this function manages update/upgrade credentials given $deleteACCOUNTS, $localACCOUNT, $adminACCOUNT, $superACCOUNT, or $jamfACCOUNT. Any errors set $credentialERROR.
 manageUpdateCredentials () {
+echo "manageUpdateCredentials"
 # Validate that the account $jamfOPTION and $jamfPASSWORD are valid.
 if [[ -n $jamfOPTION ]] && [[ "$credentialERROR" != "TRUE" ]]; then
 	jamfACCOUNT="$jamfOPTION"
@@ -815,8 +822,8 @@ if [[ -n $jamfOPTION ]] && [[ "$credentialERROR" != "TRUE" ]]; then
 	else
 		sendToLog "Credential Error: Unable to connect to Jamf Pro to validate user account."; credentialERROR="TRUE"
 	fi
-	unset jamfACCOUNT
-	unset jamfKEYCHAIN
+	# unset jamfACCOUNT
+	# unset jamfKEYCHAIN
 fi
     
     echo "skip manageUpdateCredentials as real Super script will do this"
@@ -880,12 +887,9 @@ fi
 if [[ -f "/Library/LaunchDaemons/com.macjutsu.super.plist" ]]; then
 	/bin/launchctl unload -w "/Library/LaunchDaemons/com.macjutsu.super.plist"
 fi
-#/usr/bin/curl --silent -o /tmp/super -L -O https://github.com/Macjutsu/super/raw/main/super
-/usr/bin/curl --silent -o /tmp/super -L -O https://github.com/Macjutsu/super/raw/4.0.0-beta4/super
+/usr/bin/curl --silent -o /tmp/super -L -O https://github.com/Macjutsu/super/raw/main/super
 /bin/chmod +x /tmp/super
-#echo "params = $commandPARAMS"
 array=($commandPARAMS)
-#echo "array ${array[@]}"
 mycmd=(/tmp/super "${array[@]}")
 "${mycmd[@]}"
 /bin/launchctl load -w "/Library/LaunchDaemons/com.macjutsu.super.plist"
@@ -1089,7 +1093,7 @@ sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: errorDeferSECONDS is: $errorDe
 [[ -n $superACCOUNT ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: superACCOUNT is: $superACCOUNT"
 [[ -n $superKEYCHAIN ]] && sendToEcho "Verbose Mode: Function ${FUNCNAME[0]}: superKEYCHAIN is: $superKEYCHAIN"
 [[ -n $superCREDENTIAL ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: superCREDENTIAL is: $superCREDENTIAL"
-[[ -n $JamfProID ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: AuthJamfComputerID is: $JamfProID"
+[[ -n $JamfProID ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: JamfProID is: $JamfProID"
 [[ -n $jamfOPTION ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: jamfOPTION is: $jamfOPTION"
 [[ -n $jamfPASSWORD ]] && sendToEcho "Verbose Mode: Function ${FUNCNAME[0]}: jamfPASSWORD is: $jamfPASSWORD"
 [[ -n $jamfACCOUNT ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: jamfACCOUNT is: $jamfACCOUNT"
@@ -1126,6 +1130,7 @@ sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: batteryTimeoutSECONDS is: $bat
 
 # Validate the connection to a managed computer's Jamf Pro service and set $jamfSERVER accordingly.
 getJamfProServer() {
+echo "getJamfProServer"
 jamfSTATUS=$("$jamfBINARY" checkJSSConnection -retry 1 2>/dev/null)
 [[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: jamfSTATUS is: $jamfSTATUS"
 if [[ $(echo "$jamfSTATUS" | grep -c 'available') -gt 0 ]]; then
@@ -1139,6 +1144,7 @@ fi
 
 # Attempt to acquire a Jamf Pro $jamfProTOKEN via $jamfACCOUNT and $jamfKEYCHAIN credentials.
 getJamfProToken() {
+echo "getJamfProToken"
 getJamfProServer
 if [[ "$jamfSERVER" != "FALSE" ]]; then
 	[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: jamfACCOUNT is: $jamfACCOUNT"
@@ -1160,11 +1166,35 @@ if [[ "$jamfSERVER" != "FALSE" ]]; then
 fi
 }
 
+
+# Use $jamfProIdMANAGED or $jamfProTOKEN to find the computer's Jamf Pro ID and set $jamfProID.
+getJamfProComputerID() {
+echo "getJamfProComputerID"
+computerUDID=$(system_profiler SPHardwareDataType | awk '/UUID/ { print $3; }')
+echo "computerUDID = $computerUDID"
+[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: computerUDID is: $computerUDID"
+if [[ -n $jamfProIdMANAGED ]]; then
+	jamfProID="$jamfProIdMANAGED"
+else
+	sendToLog "Warning: Using a Jamf Pro API account with \"Computers > Read\" privileges to collect the computer ID is a security risk. Instead use a custom Configuration Profile with the following; Preference Domain \"com.macjutsu.super\", Key \"AuthJamfComputerID\", String \"\$JSSID\"."
+	if [ -z "$jamfProTOKEN" ]; then
+		getJamfProToken
+		echo "got token = $jamfProTOKEN"
+	fi
+	jamfProID=$(curl --header "Authorization: Bearer ${jamfProTOKEN}" --header "Accept: application/xml" --request GET --url "${jamfSERVER}JSSResource/computers/udid/${computerUDID}/subset/General" 2> /dev/null | xpath -e /computer/general/id 2>&1 | awk -F '<id>|</id>' '{print $2}' | xargs)
+fi
+[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: jamfProID is: $jamfProID"
+}
+
+
 # Validate that the account $jamfACCOUNT and $jamfKEYCHAIN are valid credentials and has appropriate permissions to send MDM push commands. If not set $jamfERROR.
 getJamfProAccount() {
+echo "getJamfProAccount"
 getJamfProToken
 if [[ -n $jamfProTOKEN ]]; then
+	echo "before getJamfProComputerID"
 	getJamfProComputerID
+	echo "after getJamfProComputerID"
 	if [[ -n $jamfProID ]]; then
 		sendBlankPush
 			if [[ $commandRESULT != 201 ]]; then
@@ -1179,19 +1209,6 @@ else
 fi
 }
 
-# Use $jamfProIdMANAGED or $jamfProTOKEN to find the computer's Jamf Pro ID and set $jamfProID.
-getJamfProComputerID() {
-computerUDID=$(system_profiler SPHardwareDataType | awk '/UUID/ { print $3; }')
-[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: computerUDID is: $computerUDID"
-if [[ -n $jamfProIdMANAGED ]]; then
-	jamfProID="$jamfProIdMANAGED"
-else
-	sendToLog "Warning: Using a Jamf Pro API account with \"Computers > Read\" privileges to collect the computer ID is a security risk. Instead use a custom Configuration Profile with the following; Preference Domain \"com.macjutsu.super\", Key \"AuthJamfComputerID\", String \"\$JSSID\"."
-	jamfProID=$(curl --header "Authorization: Bearer ${jamfProTOKEN}" --header "Accept: application/xml" --request GET --url "${jamfSERVER}JSSResource/computers/udid/${computerUDID}/subset/General" 2> /dev/null | xpath -e /computer/general/id 2>&1 | awk -F '<id>|</id>' '{print $2}' | xargs)
-fi
-[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: AuthJamfComputerID is: $jamfProID"
-}
-
 # Attempt to send a Blank Push to Jamf Pro.
 sendBlankPush() {
 commandRESULT=$(curl --header "Authorization: Bearer ${jamfProTOKEN}" --write-out "%{http_code}" --silent --output /dev/null --request POST --url "${jamfSERVER}JSSResource/computercommands/command/BlankPush/id/${jamfProID}")
@@ -1200,6 +1217,7 @@ commandRESULT=$(curl --header "Authorization: Bearer ${jamfProTOKEN}" --write-ou
 
 # Validate existing $jamfProTOKEN and if found invalid, a new token is requested and again validated.
 checkJamfProServerToken() {
+echo "checkJamfProToken"
 tokenCHECK=$(curl --header "Authorization: Bearer ${jamfProTOKEN}" --write-out "%{http_code}" --silent --output /dev/null --request GET --url "${jamfSERVER}api/v1/auth")
 [[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: tokenCHECK is: $tokenCHECK"
 if [[ $tokenCHECK -ne 200 ]]; then
@@ -1472,7 +1490,7 @@ fi
 
 mainWorkflow() {
 # Initial super workflow preparations.
-/bin/sleep 10
+# /bin/sleep 10
 checkRoot
 setDefaults
 superStartup "$@"

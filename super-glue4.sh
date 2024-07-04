@@ -27,8 +27,8 @@
 # that can be passed to the actual Super script. I have worked to keep this overhead a low as possible and I believe only
 # two extra parameters are required for this script
 
-#superVERSION="4.0.2"
-#superDATE="2023/11/01"
+#superVERSION="4.0"
+#superDATE="2023/10/01"
 
 # MARK: *** Documentation ***
 ################################################################################
@@ -711,14 +711,19 @@ if [[ -n "$adminPASSWORD" ]]; then
 	echo "JSS = $jamfSERVER"
 	encodedCredentials=$( printf "$jamfOPTION:$jamfPASSWORD" | /usr/bin/iconv -t ISO-8859-1 | /usr/bin/base64 -i - )
 	echo "encoded = $encodedCredentials"
-#   commandRESULT=$(curl -X POST -u "$jamfOPTION:$jamfPASSWORD" -s "${jamfSERVER}api/v1/auth/token")
-	commandRESULT=$( /usr/bin/curl "{$jamfSERVER}uapi/auth/tokens" \
---silent \
---request POST \
---header "Authorization: Basic $lapsCREDENTIALS" )
+    commandRESULT=$(curl -X POST -u "$jamfOPTION:$jamfPASSWORD" -s "${jamfSERVER}api/v1/auth/token")
+#	commandRESULT=$( /usr/bin/curl "{$jamfSERVER}uapi/auth/tokens" \
+#--silent \
+#--request POST \
+#--header "Authorization: Basic $lapsCREDENTIALS" )
 	[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: commandRESULT is:\n$commandRESULT"
 	if [[ $(echo "$commandRESULT" | grep -c 'token') -gt 0 ]]; then
-		jamfProTOKEN=$( /usr/bin/awk -F \" '{ print $4 }' <<< "$commandRESULT" | /usr/bin/xargs )
+#		jamfProTOKEN=$( /usr/bin/awk -F \" '{ print $4 }' <<< "$commandRESULT" | /usr/bin/xargs )
+        if [[ $macOSMAJOR -ge 12 ]]; then
+             jamfProTOKEN=$(echo "$commandRESULT" | plutil -extract token raw -)
+        else
+             jamfProTOKEN=$(echo "$commandRESULT" | python -c 'import sys, json; print json.load(sys.stdin)["token"]')
+        fi
 		echo "jamfProTOKEN = $jamfProTOKEN"
 	else
 		sendToLog "Error: Response from Jamf Pro API token request did not contain a token."; jamfERROR="TRUE"
@@ -727,14 +732,17 @@ if [[ -n "$adminPASSWORD" ]]; then
 	#
 	# first checking if adminPASSWORD is pointing to an extension attribute and if true reading its value and storing it in adminPASSWORD
 	adminPASSWORD=$(sed -e 's/^"//' -e 's/"$//' <<<"$adminPASSWORD")
+	echo "adminPASSWORD = $adminPASSWORD"
 	if [[ "$adminPASSWORD" == "lapssecret-"* ]]; then
 		# adminPASSWD is pointing to an extension attribute
 		# remove "lapssecret-" prefix to get extension attribute name
 		extensionNAME=${adminPASSWORD#"lapssecret-"}
+		echo "extensioNAME = $extensionNAME"
 		# extensionNAME=$(echo $extensionNAME | sed -e "s/ /\\\ /g")
 	
 		# replace content of adminPASSWORD with content of extension attribute
 		extensionVALUE=$(curl -s -H "Accept: application/xml" {$jamfSERVER}JSSResource/computers/id/$jamfProID/subset/extension_attributes -H "Authorization:Bearer $jamfProTOKEN" | xpath -e "//extension_attribute[name=normalize-space('$extensionNAME')]" 2>&1 | awk -F'<value>|</value>' '{print $2}' | tail -n +1)
+		echo "extensionVALUE = $extensionVALUE"
 		if [[ -n "$extensionVALUE" ]]; then
 			adminPASSWORD="$extensionVALUE"
 		else
@@ -1150,7 +1158,8 @@ if [[ "$jamfSERVER" != "FALSE" ]]; then
 	[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: jamfACCOUNT is: $jamfACCOUNT"
 	[[ "$verboseModeOPTION" == "TRUE" ]] && sendToEcho "Verbose Mode: Function ${FUNCNAME[0]}: jamfKEYCHAIN is: $jamfKEYCHAIN"
 	[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: jamfSERVER is: $jamfSERVER"
-	commandRESULT=$(curl -X POST -u "$jamfACCOUNT:$jamfKEYCHAIN" -s "${jamfSERVER}api/v1/auth/token")
+#	commandRESULT=$(curl -X POST -u "$jamfACCOUNT:$jamfKEYCHAIN" -s "${jamfSERVER}api/v1/auth/token")
+	commandRESULT=$(curl -X POST -u "$jamfOPTION:$jamfPASSWORD" -s "${jamfSERVER}api/v1/auth/token")
     echo "token commandRESULT = $commandRESULT"
 	[[ "$verboseModeOPTION" == "TRUE" ]] && sendToLog "Verbose Mode: Function ${FUNCNAME[0]}: commandRESULT is:\n$commandRESULT"
 	if [[ $(echo "$commandRESULT" | grep -c 'token') -gt 0 ]]; then
